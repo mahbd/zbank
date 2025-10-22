@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { transactionSchema } from '@/lib/validations'
 
 export async function GET() {
   try {
+    const session = await auth()
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const transactions = await prisma.transaction.findMany({
+      where: {
+        userId: session.user.id
+      },
       include: {
         card: true,
         user: true
@@ -12,7 +22,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
       take: 50
     })
-    
+
     return NextResponse.json(transactions)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 })
@@ -21,33 +31,43 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth()
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const validatedData = transactionSchema.parse(body)
     const { cardId, ...transactionData } = body
-    
-    // Check if card exists and is active
+
+    // Check if card exists, is active, and belongs to the user
     const card = await prisma.card.findUnique({
       where: { id: cardId }
     })
-    
+
     if (!card) {
       return NextResponse.json({ error: 'Card not found' }, { status: 404 })
     }
-    
+
+    if (card.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
     if (card.status !== 'ACTIVE') {
       return NextResponse.json({ error: 'Card is not active' }, { status: 400 })
     }
-    
+
     // Create transaction
     const transaction = await prisma.transaction.create({
       data: {
         ...transactionData,
         cardId: cardId,
-        userId: card.userId,
+        userId: session.user.id,
         status: 'COMPLETED'
       }
     })
-    
+
     // Update card balance for payments
     if (validatedData.type === 'PAYMENT' && validatedData.amount > 0) {
       await prisma.card.update({
@@ -59,7 +79,7 @@ export async function POST(request: NextRequest) {
         }
       })
     }
-    
+
     return NextResponse.json(transaction, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create transaction' }, { status: 500 })

@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession, signOut } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CreditCard, Plus, Activity, DollarSign, Lock, Unlock } from 'lucide-react'
+import { CreditCard, Plus, Activity, DollarSign, Lock, Unlock, LogOut, User } from 'lucide-react'
 import { formatCurrency, formatCardNumber } from '@/lib/utils'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -45,6 +46,7 @@ interface Transaction {
 }
 
 export default function Dashboard() {
+  const { data: session, status } = useSession()
   const [cards, setCards] = useState<BankCard[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(false)
@@ -235,15 +237,45 @@ export default function Dashboard() {
     return typeMap[serviceId] || 'PAYMENT'
   }
 
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null // Middleware will redirect to signin
+  }
+
   return (
     <>
       <div className="min-h-screen bg-gray-50 p-6" data-testid="dashboard">
         <div className="max-w-7xl mx-auto">
           <header className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900" data-testid="dashboard-title">
-              ZBank Dashboard
-            </h1>
-            <p className="text-gray-600">Manage your cards and transactions</p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900" data-testid="dashboard-title">
+                  ZBank Dashboard
+                </h1>
+                <p className="text-gray-600">Manage your cards and transactions</p>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <User className="w-4 h-4" />
+                  <span className="text-sm font-medium">{session?.user?.name || session?.user?.email}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+                  className="flex items-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </Button>
+              </div>
+            </div>
           </header>
 
           {loading ? (
