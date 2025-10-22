@@ -26,7 +26,7 @@ export const createCardSchema = z.object({
 
 export const transactionSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
-  type: z.enum(['PAYMENT', 'REFUND', 'TOP_UP', 'BILL_PAYMENT', 'MOBILE_RECHARGE', 'QR_PAYMENT']),
+  type: z.enum(['PAYMENT', 'REFUND', 'TOP_UP', 'BILL_PAYMENT', 'MOBILE_RECHARGE', 'QR_PAYMENT', 'INTERNET_BILL', 'ELECTRICITY_BILL', 'GAS_BILL', 'WATER_BILL', 'CABLE_TV', 'INSURANCE', 'EDUCATION_FEES', 'HEALTHCARE', 'TRANSPORT']),
   description: z.string().min(1, 'Description is required'),
   merchantName: z.string().optional(),
   category: z.string().optional(),

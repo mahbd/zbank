@@ -16,6 +16,7 @@ import { CardCreationDialog } from "@/components/CardCreationDialog"
 import { PaymentDialog } from "@/components/PaymentDialog"
 import { CardsList } from "@/components/CardsList"
 import { TransactionsList } from "@/components/TransactionsList"
+import { VASServices } from "@/components/VASServices"
 import { toast } from "sonner"
 
 interface BankCard {
@@ -50,6 +51,13 @@ export default function Dashboard() {
   const [createVirtualCardOpen, setCreateVirtualCardOpen] = useState(false)
   const [createPhysicalCardOpen, setCreatePhysicalCardOpen] = useState(false)
   const [makePaymentOpen, setMakePaymentOpen] = useState(false)
+  const [selectedVASService, setSelectedVASService] = useState<{
+    id: string
+    name: string
+    description: string
+    minAmount: number
+    maxAmount: number
+  } | null>(null)
 
   const createCardForm = useForm<CreateCardInput>({
     resolver: zodResolver(createCardSchema),
@@ -187,6 +195,7 @@ export default function Dashboard() {
             : card
         ))
         setMakePaymentOpen(false)
+        setSelectedVASService(null)
         paymentForm.reset()
         toast.success('Payment made successfully!')
       } else {
@@ -196,6 +205,34 @@ export default function Dashboard() {
       console.error('Error making payment:', error)
       toast.error('Error making payment')
     }
+  }
+
+  const handleVASServiceSelect = (service: any) => {
+    setSelectedVASService(service)
+    // Pre-fill the payment form with VAS service details
+    paymentForm.setValue('type', getTransactionTypeFromService(service.id))
+    paymentForm.setValue('description', service.name)
+    paymentForm.setValue('merchantName', service.name)
+    paymentForm.setValue('amount', service.minAmount)
+    // Don't set cardId here - user will select in dialog
+    paymentForm.setValue('cardId', '')
+    setMakePaymentOpen(true)
+  }
+
+  const getTransactionTypeFromService = (serviceId: string): PaymentInput['type'] => {
+    const typeMap: { [key: string]: PaymentInput['type'] } = {
+      'mobile_recharge': 'MOBILE_RECHARGE',
+      'electricity_bill': 'ELECTRICITY_BILL',
+      'gas_bill': 'GAS_BILL',
+      'water_bill': 'WATER_BILL',
+      'cable_tv': 'CABLE_TV',
+      'internet_bill': 'INTERNET_BILL',
+      'insurance': 'INSURANCE',
+      'education_fees': 'EDUCATION_FEES',
+      'healthcare': 'HEALTHCARE',
+      'transport': 'TRANSPORT'
+    }
+    return typeMap[serviceId] || 'PAYMENT'
   }
 
   return (
@@ -247,6 +284,9 @@ export default function Dashboard() {
                   loading={loading} 
                 />
               </section>
+
+              <VASServices onSelectService={handleVASServiceSelect} />
+
               <TransactionsList transactions={transactions} />
             </>
           )}
@@ -271,10 +311,15 @@ export default function Dashboard() {
       />
       <PaymentDialog 
         open={makePaymentOpen} 
-        onOpenChange={setMakePaymentOpen} 
+        onOpenChange={(open) => {
+          setMakePaymentOpen(open)
+          if (!open) setSelectedVASService(null)
+        }}
         form={paymentForm} 
         onSubmit={makePayment} 
-        loading={loading} 
+        loading={loading}
+        selectedService={selectedVASService || undefined}
+        availableCards={cards}
       />
     </>
   )

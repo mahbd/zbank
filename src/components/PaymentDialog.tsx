@@ -12,6 +12,20 @@ interface PaymentDialogProps {
   form: UseFormReturn<PaymentInput>
   onSubmit: (data: PaymentInput) => void
   loading: boolean
+  selectedService?: {
+    name: string
+    description: string
+    minAmount: number
+    maxAmount: number
+  }
+  availableCards?: Array<{
+    id: string
+    cardNumber: string
+    scheme: string
+    cardType: string
+    balance: number
+    status: string
+  }>
 }
 
 export function PaymentDialog({
@@ -19,16 +33,93 @@ export function PaymentDialog({
   onOpenChange,
   form,
   onSubmit,
-  loading
+  loading,
+  selectedService,
+  availableCards = []
 }: PaymentDialogProps) {
+  const transactionTypes = [
+    { value: 'PAYMENT', label: 'General Payment' },
+    { value: 'BILL_PAYMENT', label: 'Bill Payment' },
+    { value: 'MOBILE_RECHARGE', label: 'Mobile Recharge' },
+    { value: 'QR_PAYMENT', label: 'QR Payment' },
+    { value: 'INTERNET_BILL', label: 'Internet Bill' },
+    { value: 'ELECTRICITY_BILL', label: 'Electricity Bill' },
+    { value: 'GAS_BILL', label: 'Gas Bill' },
+    { value: 'WATER_BILL', label: 'Water Bill' },
+    { value: 'CABLE_TV', label: 'Cable TV' },
+    { value: 'INSURANCE', label: 'Insurance' },
+    { value: 'EDUCATION_FEES', label: 'Education Fees' },
+    { value: 'HEALTHCARE', label: 'Healthcare' },
+    { value: 'TRANSPORT', label: 'Transport' }
+  ]
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Make Payment</DialogTitle>
+          <DialogTitle>
+            {selectedService ? `Pay ${selectedService.name}` : 'Make Payment'}
+          </DialogTitle>
+          {selectedService && (
+            <p className="text-sm text-gray-600">{selectedService.description}</p>
+          )}
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {!selectedService && (
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {transactionTypes.map(type => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <FormField
+              control={form.control}
+              name="cardId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Select Card</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a card for payment" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {availableCards
+                        .filter(card => card.status === 'ACTIVE')
+                        .map(card => (
+                          <SelectItem key={card.id} value={card.id}>
+                            {card.scheme} ****{card.cardNumber.slice(-4)} - ${card.balance.toFixed(2)} available
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="amount"
@@ -36,35 +127,24 @@ export function PaymentDialog({
                 <FormItem>
                   <FormLabel>Amount</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value))} />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder={selectedService ? `${selectedService.minAmount} - ${selectedService.maxAmount}` : "0.00"}
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                    />
                   </FormControl>
+                  {selectedService && (
+                    <p className="text-xs text-gray-500">
+                      Range: ${selectedService.minAmount} - ${selectedService.maxAmount}
+                    </p>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="PAYMENT">Payment</SelectItem>
-                      <SelectItem value="BILL_PAYMENT">Bill Payment</SelectItem>
-                      <SelectItem value="MOBILE_RECHARGE">Mobile Recharge</SelectItem>
-                      <SelectItem value="QR_PAYMENT">QR Payment</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <FormField
               control={form.control}
               name="description"
@@ -72,27 +152,35 @@ export function PaymentDialog({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      placeholder={selectedService ? selectedService.name : "Payment description"}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="merchantName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Merchant Name (optional)</FormLabel>
+                  <FormLabel>Service Provider / Merchant</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      placeholder={selectedService ? selectedService.name : "Merchant name"}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={loading}>
-              Make Payment
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? 'Processing...' : 'Make Payment'}
             </Button>
           </form>
         </Form>
