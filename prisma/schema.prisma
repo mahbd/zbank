@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  name      String
+  phone     String?
+  dateOfBirth DateTime?
+  address   String?
+  city      String?
+  state     String?
+  zipCode   String?
+  country   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  cards     Card[]
+  transactions Transaction[]
+}
+
+model Card {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  cardNumber  String    @unique
+  cardType    CardType
+  status      CardStatus @default(ACTIVE)
+  balance     Float     @default(0)
+  scheme      String    // Visa, Mastercard, etc.
+  expiryDate  DateTime
+  cvv         String
+  isVirtual   Boolean   @default(false)
+  
+  // Cardholder information
+  cardholderName String?
+  
+  // Limits and settings
+  creditLimit   Float?
+  dailyLimit    Float     @default(1000)
+  pin           String?
+  
+  // Delivery information (for physical cards)
+  deliveryAddress String?
+  deliveryCity    String?
+  deliveryState   String?
+  deliveryZipCode String?
+  deliveryCountry String?
+  
+  userId      String    @db.ObjectId
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User      @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  amount      Float
+  type        TransactionType
+  status      TransactionStatus @default(PENDING)
+  description String
+  merchantName String?
+  category    String?
+  cardId      String      @db.ObjectId
+  userId      String      @db.ObjectId
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  card        Card        @relation(fields: [cardId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+}
+
+enum CardType {
+  PHYSICAL
+  VIRTUAL
+}
+
+enum CardStatus {
+  ACTIVE
+  FROZEN
+  BLOCKED
+  EXPIRED
+}
+
+enum TransactionType {
+  PAYMENT
+  REFUND
+  TOP_UP
+  BILL_PAYMENT
+  MOBILE_RECHARGE
+  QR_PAYMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}

@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Use current directory. Build a banking platform demo website using Next.js, Prisma, MongoDB, Zod, and React Hook Form. Use tailwindcss for styling. use shadcn if needed.
 
-## Getting Started
+The website should be well-structured, easily testable, and include proper id and class attributes for all key elements to facilitate automated or manual testing.
 
-First, run the development server:
+Core Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Issuing Card
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create, activate, and manage virtual and physical cards.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Display card details securely.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Include options to freeze/unfreeze cards.
 
-## Learn More
+Payments
 
-To learn more about Next.js, take a look at the following resources:
+Physical Payments: Simulate POS transactions or in-person purchases.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Online Payments: Handle online merchant transactions.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+VAS (Value-Added Services): e.g., mobile recharge, bill payments, etc.
 
-## Deploy on Vercel
+APMs (Alternative Payment Methods): e.g., wallet top-ups, QR payments, etc.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Scheme Capabilities
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Support multiple payment schemes (e.g., Visa, Mastercard, local schemes).
+
+Include configuration or simulation for scheme-level settings or limits.
+
+Additional Requirements
+
+Implement clean and modular code architecture.
+
+Use Zod for validation in both frontend forms and backend APIs.
+
+Use React Hook Form for managing all forms.
+
+Prisma + MongoDB for database integration.
+
+Include sample test data to make the demo interactive.
+
+Add clear UI indicators (status, loading, success/failure).
+
+Ensure responsive and modern UI design.
