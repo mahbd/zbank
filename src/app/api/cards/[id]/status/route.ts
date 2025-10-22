@@ -5,7 +5,7 @@ import { cardStatusSchema } from '@/lib/validations'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -17,9 +17,12 @@ export async function PATCH(
     const body = await request.json()
     const validatedData = cardStatusSchema.parse(body)
 
+    // Await the params since they're now Promise-based in Next.js 16
+    const { id } = await params
+
     // Check if card exists and belongs to the user
     const card = await prisma.card.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!card) {
@@ -31,7 +34,7 @@ export async function PATCH(
     }
 
     const updatedCard = await prisma.card.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: validatedData.status }
     })
 

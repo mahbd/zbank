@@ -41,6 +41,9 @@ export async function POST(request: NextRequest) {
     const validatedData = transactionSchema.parse(body)
     const { cardId, ...transactionData } = body
 
+    // Define payment types that require balance validation
+    const paymentTypes = ['PAYMENT', 'BILL_PAYMENT', 'MOBILE_RECHARGE', 'QR_PAYMENT', 'INTERNET_BILL', 'ELECTRICITY_BILL', 'GAS_BILL', 'WATER_BILL', 'CABLE_TV', 'INSURANCE', 'EDUCATION_FEES', 'HEALTHCARE', 'TRANSPORT']
+
     // Check if card exists, is active, and belongs to the user
     const card = await prisma.card.findUnique({
       where: { id: cardId }
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check sufficient balance for payments
-    if (validatedData.type === 'PAYMENT' && validatedData.amount > 0) {
+    if (paymentTypes.includes(validatedData.type) && validatedData.amount > 0) {
       if (card.balance < validatedData.amount) {
         return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 })
       }
@@ -76,7 +79,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Update card balance for payments
-    if (validatedData.type === 'PAYMENT' && validatedData.amount > 0) {
+    if (paymentTypes.includes(validatedData.type) && validatedData.amount > 0) {
       await prisma.card.update({
         where: { id: cardId },
         data: {
