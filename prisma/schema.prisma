@@ -21,6 +21,7 @@ model User {
   country   String?
   emailVerified DateTime?
   image     String?
+  balance   Float    @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
@@ -145,6 +146,7 @@ enum TransactionType {
   EDUCATION_FEES
   HEALTHCARE
   TRANSPORT
+  TRANSFER
 }
 
 enum TransactionStatus {

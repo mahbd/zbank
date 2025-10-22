@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { createCardSchema, transactionSchema, type CreateCardInput, type TransactionInput, paymentSchema, type PaymentInput } from '@/lib/validations'
 import { CardCreationDialog } from "@/components/CardCreationDialog"
 import { PaymentDialog } from "@/components/PaymentDialog"
+import { TransferDialog } from "@/components/TransferDialog"
 import { CardsList } from "@/components/CardsList"
 import { TransactionsList } from "@/components/TransactionsList"
 import { VASServices } from "@/components/VASServices"
@@ -53,6 +54,7 @@ export default function Dashboard() {
   const [createVirtualCardOpen, setCreateVirtualCardOpen] = useState(false)
   const [createPhysicalCardOpen, setCreatePhysicalCardOpen] = useState(false)
   const [makePaymentOpen, setMakePaymentOpen] = useState(false)
+  const [makeTransferOpen, setMakeTransferOpen] = useState(false)
   const [selectedVASService, setSelectedVASService] = useState<{
     id: string
     name: string
@@ -304,6 +306,14 @@ export default function Dashboard() {
                       <Plus className="w-4 h-4 mr-2" />
                       Physical Card
                     </Button>
+                    <Button 
+                      onClick={() => setMakeTransferOpen(true)}
+                      disabled={loading}
+                      variant="outline"
+                      data-testid="transfer-money-btn"
+                    >
+                      Transfer Money
+                    </Button>
                   </div>
                 </div>
                 <CardsList 
@@ -342,7 +352,7 @@ export default function Dashboard() {
         loading={loading} 
       />
       <PaymentDialog 
-        open={makePaymentOpen} 
+        open={makePaymentOpen}
         onOpenChange={(open) => {
           setMakePaymentOpen(open)
           if (!open) setSelectedVASService(null)
@@ -352,6 +362,12 @@ export default function Dashboard() {
         loading={loading}
         selectedService={selectedVASService || undefined}
         availableCards={cards}
+      />
+      <TransferDialog
+        open={makeTransferOpen}
+        onOpenChange={setMakeTransferOpen}
+        availableCards={cards}
+        loading={loading}
       />
     </>
   )

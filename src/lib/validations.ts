@@ -26,7 +26,7 @@ export const createCardSchema = z.object({
 
 export const transactionSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
-  type: z.enum(['PAYMENT', 'REFUND', 'TOP_UP', 'BILL_PAYMENT', 'MOBILE_RECHARGE', 'QR_PAYMENT', 'INTERNET_BILL', 'ELECTRICITY_BILL', 'GAS_BILL', 'WATER_BILL', 'CABLE_TV', 'INSURANCE', 'EDUCATION_FEES', 'HEALTHCARE', 'TRANSPORT']),
+  type: z.enum(['PAYMENT', 'REFUND', 'TOP_UP', 'BILL_PAYMENT', 'MOBILE_RECHARGE', 'QR_PAYMENT', 'INTERNET_BILL', 'ELECTRICITY_BILL', 'GAS_BILL', 'WATER_BILL', 'CABLE_TV', 'INSURANCE', 'EDUCATION_FEES', 'HEALTHCARE', 'TRANSPORT', 'TRANSFER']),
   description: z.string().min(1, 'Description is required'),
   merchantName: z.string().optional(),
   category: z.string().optional(),
@@ -44,4 +44,12 @@ export const paymentSchema = transactionSchema.extend({
   cardId: z.string().min(1, 'Card is required'),
 })
 
+export const transferSchema = z.object({
+  recipientEmail: z.string().email('Valid email is required'),
+  amount: z.number().positive('Amount must be positive').min(1, 'Minimum transfer amount is $1'),
+  cardId: z.string().min(1, 'Card is required'),
+  description: z.string().min(1, 'Description is required').max(200, 'Description too long'),
+})
+
 export type PaymentInput = z.infer<typeof paymentSchema>
+export type TransferInput = z.infer<typeof transferSchema>
