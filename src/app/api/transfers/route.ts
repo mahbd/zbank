@@ -54,6 +54,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Cannot transfer to yourself' }, { status: 400 })
     }
 
+    // Check if recipient has an active card (for card-to-card transfer)
+    const recipientCards = await prisma.card.findMany({
+      where: {
+        userId: recipient.id,
+        status: 'ACTIVE'
+      }
+    })
+
+    // Determine which recipient card to use
+    let recipientCard = null
+    if (validatedData.recipientCardId) {
+      // User specified which card to transfer to
+      recipientCard = recipientCards.find(card => card.id === validatedData.recipientCardId)
+      if (!recipientCard) {
+        return NextResponse.json({ error: 'Selected recipient card not found or not active' }, { status: 400 })
+      }
+    } else if (recipientCards.length === 1) {
+      // Only one card, use it
+      recipientCard = recipientCards[0]
+    }
+    // If multiple cards and no selection, recipientCard remains null (transfer to account balance)
+
     // Start transaction to ensure atomicity
     const result = await prisma.$transaction(async (tx) => {
       // Create debit transaction for sender
@@ -70,21 +92,7 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // Create credit transaction for recipient (without card, as it's account credit)
-      const creditTransaction = await tx.transaction.create({
-        data: {
-          amount: validatedData.amount,
-          type: 'TRANSFER',
-          status: 'COMPLETED',
-          description: `Transfer from ${userEmail}: ${validatedData.description}`,
-          merchantName: userName,
-          category: 'Transfer',
-          cardId: senderCard.id, // Use sender's card for reference
-          userId: recipient.id,
-        }
-      })
-
-      // Update sender's card balance
+      // Update sender's card balance (debit)
       await tx.card.update({
         where: { id: senderCard.id },
         data: {
@@ -94,25 +102,80 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // Update recipient's account balance
-      await tx.user.update({
-        where: { id: recipient.id },
-        data: {
-          balance: {
-            increment: validatedData.amount
-          }
-        }
-      })
+      let creditTransaction
 
-      return { debitTransaction, creditTransaction }
+      if (recipientCard) {
+        // Card-to-card transfer: credit recipient's card
+        creditTransaction = await tx.transaction.create({
+          data: {
+            amount: validatedData.amount,
+            type: 'TRANSFER',
+            status: 'COMPLETED',
+            description: `Transfer from ${userEmail}: ${validatedData.description}`,
+            merchantName: userName,
+            category: 'Transfer',
+            cardId: recipientCard.id,
+            userId: recipient.id,
+          }
+        })
+
+        // Update recipient's card balance (credit)
+        await tx.card.update({
+          where: { id: recipientCard.id },
+          data: {
+            balance: {
+              increment: validatedData.amount
+            }
+          }
+        })
+      } else {
+        // Transfer to account balance (recipient has multiple cards or no active card)
+        creditTransaction = await tx.transaction.create({
+          data: {
+            amount: validatedData.amount,
+            type: 'TRANSFER',
+            status: 'COMPLETED',
+            description: `Transfer from ${userEmail}: ${validatedData.description}`,
+            merchantName: userName,
+            category: 'Transfer',
+            cardId: senderCard.id, // Reference sender's card for transaction history
+            userId: recipient.id,
+          }
+        })
+
+        // Update recipient's account balance
+        await tx.user.update({
+          where: { id: recipient.id },
+          data: {
+            balance: {
+              increment: validatedData.amount
+            }
+          }
+        })
+      }
+
+      return { debitTransaction, creditTransaction, recipientCard: !!recipientCard, recipientCardsCount: recipientCards.length, selectedRecipientCard: recipientCard }
     })
 
     return NextResponse.json({
-      message: 'Transfer completed successfully',
+      message: result.recipientCard
+        ? `Transfer completed successfully. Funds sent to recipient's ${result.selectedRecipientCard?.cardType?.toLowerCase() || 'card'}.`
+        : result.recipientCardsCount > 1
+        ? 'Transfer completed successfully. Funds sent to recipient\'s account balance (select a specific card to transfer directly to it).'
+        : 'Transfer completed successfully. Funds sent to recipient\'s account balance.',
       transfer: {
         id: result.debitTransaction.id,
         amount: validatedData.amount,
         recipient: recipient.email,
+        recipientCard: result.recipientCard,
+        recipientCardsCount: result.recipientCardsCount,
+        selectedRecipientCard: result.selectedRecipientCard ? {
+          id: result.selectedRecipientCard.id,
+          cardNumber: result.selectedRecipientCard.cardNumber,
+          cardType: result.selectedRecipientCard.cardType,
+          scheme: result.selectedRecipientCard.scheme
+        } : null,
+        transferType: result.recipientCard ? 'card-to-card' : 'account-balance',
         description: validatedData.description,
       }
     }, { status: 201 })

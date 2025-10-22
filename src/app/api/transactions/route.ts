@@ -58,6 +58,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Card is not active' }, { status: 400 })
     }
 
+    // Check sufficient balance for payments
+    if (validatedData.type === 'PAYMENT' && validatedData.amount > 0) {
+      if (card.balance < validatedData.amount) {
+        return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 })
+      }
+    }
+
     // Create transaction
     const transaction = await prisma.transaction.create({
       data: {

@@ -48,6 +48,7 @@ export const transferSchema = z.object({
   recipientEmail: z.string().email('Valid email is required'),
   amount: z.number().positive('Amount must be positive').min(1, 'Minimum transfer amount is $1'),
   cardId: z.string().min(1, 'Card is required'),
+  recipientCardId: z.string().optional(),
   description: z.string().min(1, 'Description is required').max(200, 'Description too long'),
 })
 
