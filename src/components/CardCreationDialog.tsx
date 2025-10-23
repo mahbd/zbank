@@ -39,8 +39,8 @@ export function CardCreationDialog({
                   <FormLabel>Card Scheme</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select card scheme" />
+                      <SelectTrigger id="card-scheme-select">
+                        <SelectValue placeholder="Select card scheme"/>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

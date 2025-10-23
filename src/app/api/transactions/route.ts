@@ -13,7 +13,7 @@ export async function GET() {
 
     const transactions = await prisma.transaction.findMany({
       where: {
-        userId: session.user.id
+        userId: parseInt(session.user.id)
       },
       include: {
         card: true,
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Card not found' }, { status: 404 })
     }
 
-    if (card.userId !== session.user.id) {
+    if (card.userId !== parseInt(session.user.id)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       data: {
         ...transactionData,
         cardId: cardId,
-        userId: session.user.id,
+        userId: parseInt(session.user.id),
         status: 'COMPLETED'
       }
     })
