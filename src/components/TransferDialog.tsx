@@ -46,6 +46,8 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [recipientCards, setRecipientCards] = useState<RecipientCard[]>([])
   const [loadingRecipientCards, setLoadingRecipientCards] = useState(false)
+  const [otpSent, setOtpSent] = useState(false)
+  const [requestingOTP, setRequestingOTP] = useState(false)
 
   const form = useForm<TransferInput>({
     resolver: zodResolver(transferSchema),
@@ -54,11 +56,12 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
       amount: 0,
       cardId: "",
       description: "",
+      otp: "",
     },
   })
 
   const selectedCardId = form.watch("cardId")
-  const selectedCard = availableCards.find(card => card.id === selectedCardId)
+  const selectedCard = availableCards.find(card => String(card.id) === selectedCardId)
   const transferAmount = form.watch("amount")
 
   // Search for users when query changes
@@ -114,6 +117,35 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
     }
   }
 
+  const requestOTP = async () => {
+    setRequestingOTP(true)
+    try {
+      const response = await fetch('/api/otp/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ purpose: 'transfer' }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setOtpSent(true)
+        toast.success('OTP sent to your email!')
+        
+        // In development, show the OTP for testing
+        if (process.env.NODE_ENV === 'development' && data.otp) {
+          toast.info(`Development: OTP is ${data.otp}`)
+        }
+      } else {
+        toast.error('Failed to send OTP')
+      }
+    } catch (error) {
+      console.error('Error requesting OTP:', error)
+      toast.error('Failed to send OTP')
+    } finally {
+      setRequestingOTP(false)
+    }
+  }
+
   const onSubmit = async (data: TransferInput) => {
     setIsSubmitting(true)
     try {
@@ -134,10 +166,20 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
         setSelectedUser(null)
         setUserSearchQuery("")
         setRecipientCards([])
+        setOtpSent(false)
         onOpenChange(false)
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to process transfer')
+        
+        // Handle OTP-specific errors
+        if (error.error === 'Invalid or expired OTP') {
+          form.setError('otp', {
+            type: 'server',
+            message: 'Invalid or expired OTP. Please request a new one.'
+          })
+        } else {
+          toast.error(error.error || 'Failed to process transfer')
+        }
       }
     } catch (error) {
       console.error('Transfer error:', error)
@@ -336,6 +378,41 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="otp"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Verification Code</FormLabel>
+                  <div className="flex space-x-2">
+                    <FormControl>
+                      <Input
+                        placeholder="Enter 6-digit OTP"
+                        maxLength={6}
+                        {...field}
+                        className="flex-1"
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={requestOTP}
+                      disabled={requestingOTP || otpSent}
+                      className="whitespace-nowrap"
+                    >
+                      {requestingOTP ? 'Sending...' : otpSent ? 'OTP Sent' : 'Get OTP'}
+                    </Button>
+                  </div>
+                  {otpSent && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      OTP sent to your email. Check your inbox and enter the 6-digit code.
+                    </p>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="flex justify-end space-x-2 pt-4">
               <Button
                 type="button"
@@ -347,7 +424,25 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting || !selectedCard || transferAmount > selectedCard.balance || !selectedUser || (recipientCards.length > 1 && !form.watch("recipientCardId"))}
+                disabled={(() => {
+                  const disabled = isSubmitting || !selectedCard || transferAmount > selectedCard.balance || !selectedUser || (recipientCards.length > 1 && !form.watch("recipientCardId")) || !form.watch("otp");
+                  if (disabled) {
+                    console.log('Transfer button disabled because:', {
+                      isSubmitting,
+                      selectedCard: !!selectedCard,
+                      transferAmount,
+                      selectedCardBalance: selectedCard?.balance,
+                      amountExceedsBalance: transferAmount > (selectedCard?.balance || 0),
+                      selectedUser: !!selectedUser,
+                      recipientCardsLength: recipientCards.length,
+                      recipientCardId: form.watch("recipientCardId"),
+                      needsRecipientCard: recipientCards.length > 1 && !form.watch("recipientCardId"),
+                      otp: form.watch("otp"),
+                      hasOtp: !!form.watch("otp")
+                    });
+                  }
+                  return disabled;
+                })()}
               >
                 {isSubmitting ? "Processing..." : "Transfer"}
               </Button>
