@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZBank - Digital Banking Platform",
+  title: "ZeuZ Bank - Digital Banking Platform",
   description: "Modern banking platform with card management and payments",
 };
 

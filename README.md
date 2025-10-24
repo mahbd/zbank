@@ -1,6 +1,6 @@
-# ZBank - Digital Banking Platform
+# ZeuZ Bank - Digital Banking Platform
 
-A modern, full-featured digital banking platform built with Next.js, TypeScript, and Prisma. ZBank provides comprehensive banking services including card management, payments, transfers, and value-added services.
+A modern, full-featured digital banking platform built with Next.js, TypeScript, and Prisma. ZeuZ Bank provides comprehensive banking services including card management, payments, transfers, and value-added services.
 
 ## 🚀 Features
 
@@ -123,7 +123,7 @@ The application uses Prisma with SQLite and includes the following models:
 
 ## 🔐 Authentication
 
-ZBank uses NextAuth.js for authentication with:
+ZeuZ Bank uses NextAuth.js for authentication with:
 - Credentials provider for email/password login
 - JWT tokens for session management
 - Protected routes with middleware
@@ -159,7 +159,7 @@ ZBank uses NextAuth.js for authentication with:
 
 ## 🛍️ Value Added Services
 
-ZBank integrates various bill payment services:
+ZeuZ Bank integrates various bill payment services:
 - **Utilities**: Electricity, gas, water, internet
 - **Communication**: Mobile recharge, cable TV
 - **Insurance**: Premium payments

@@ -41,11 +41,11 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions): Prom
 }
 
 export async function sendWelcomeEmail(email: string, name: string): Promise<boolean> {
-  const subject = 'Welcome to ZBank!'
+  const subject = 'Welcome to ZeuZ Bank!'
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #2563eb;">Welcome to ZBank, ${name}!</h1>
-      <p>Thank you for joining ZBank. Your account has been successfully created.</p>
+      <h1 style="color: #2563eb;">Welcome to ZeuZ Bank, ${name}!</h1>
+      <p>Thank you for joining ZeuZ Bank. Your account has been successfully created.</p>
       <p>You can now:</p>
       <ul>
         <li>Create virtual and physical cards</li>
@@ -54,7 +54,7 @@ export async function sendWelcomeEmail(email: string, name: string): Promise<boo
         <li>Monitor your transactions</li>
       </ul>
       <p>If you have any questions, please don't hesitate to contact our support team.</p>
-      <p>Best regards,<br>The ZBank Team</p>
+      <p>Best regards,<br>The ZeuZ Bank Team</p>
     </div>
   `
 
@@ -73,7 +73,7 @@ export async function sendTransactionNotification(
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #2563eb;">Transaction Notification</h2>
       <p>Dear ${name},</p>
-      <p>A transaction has been processed on your ZBank account:</p>
+      <p>A transaction has been processed on your ZeuZ Bank account:</p>
       <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <p><strong>Transaction Type:</strong> ${transactionType}</p>
         <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
@@ -81,7 +81,7 @@ export async function sendTransactionNotification(
         <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
       </div>
       <p>If you did not authorize this transaction, please contact our support team immediately.</p>
-      <p>Best regards,<br>The ZBank Team</p>
+      <p>Best regards,<br>The ZeuZ Bank Team</p>
     </div>
   `
 
@@ -108,7 +108,7 @@ export async function sendCardStatusChangeNotification(
         <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
       </div>
       <p>If you have any questions about this change, please contact our support team.</p>
-      <p>Best regards,<br>The ZBank Team</p>
+      <p>Best regards,<br>The ZeuZ Bank Team</p>
     </div>
   `
 
@@ -187,12 +187,12 @@ export async function verifyOTP(email: string, code: string, purpose: string = '
 }
 
 export async function sendOTPEmail(email: string, otp: string, purpose: string = 'transfer'): Promise<boolean> {
-  const subject = `ZBank OTP - ${purpose.charAt(0).toUpperCase() + purpose.slice(1)} Verification`
+  const subject = `ZeuZ Bank OTP - ${purpose.charAt(0).toUpperCase() + purpose.slice(1)} Verification`
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">ZBank</h1>
+        <h1 style="margin: 0; font-size: 24px;">ZeuZ Bank</h1>
         <p style="margin: 10px 0 0 0; opacity: 0.9;">Secure Verification</p>
       </div>
       <div style="background-color: #ffffff; padding: 40px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
@@ -222,8 +222,8 @@ export async function sendOTPEmail(email: string, otp: string, purpose: string =
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
 
         <div style="text-align: center; color: #9ca3af; font-size: 12px;">
-          <p>This is an automated message from ZBank. Please do not reply to this email.</p>
-          <p>© 2025 ZBank. All rights reserved.</p>
+          <p>This is an automated message from ZeuZ Bank. Please do not reply to this email.</p>
+          <p>© 2025 ZeuZ Bank. All rights reserved.</p>
         </div>
       </div>
     </div>
