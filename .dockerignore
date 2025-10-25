@@ -21,3 +21,26 @@ cypress/
 # Ignore editor and OS specific files
 .DS_Store
 *.swp
+
+# Ignore local database files
+prisma/*.db
+local-db-data/
+
+# Ignore build artifacts and cache
+.next
+dist/
+build/
+
+# Ignore logs
+*.log
+logs/
+
+# Ignore Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Ignore documentation and misc
+README.md
+*.md
+zbank.tar

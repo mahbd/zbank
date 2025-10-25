@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   zbank:
     image: zbank:latest
@@ -8,10 +6,10 @@ services:
     volumes:
       - zbank:/app
     environment:
-      DATABASE_URL: "file:./prod.db"
+      DATABASE_URL: "file:./local-db-data/prod.db"
       EMAIL_HOST: "smtp.gmail.com"
       AUTH_SECRET: "your-secret-key"
-      AUTH_URL: "http://demo.zeuz.ai"
+      AUTH_URL: "http://localhost:8100"
       EMAIL_PORT: "587"
       EMAIL_SECURE: "false"
       EMAIL_USER: "mahbdf4@gmail.com"
