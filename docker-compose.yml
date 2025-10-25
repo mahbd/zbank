@@ -4,7 +4,8 @@ services:
   zbank:
     image: zbank:latest
     container_name: zbank_app 
-      - "80:3005"
+    ports:
+      - "8100:3005"
     volumes:
       - /home/ubuntu/zbank/:/app
     environment:
