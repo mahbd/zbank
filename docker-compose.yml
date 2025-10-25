@@ -1,0 +1,22 @@
+services:
+  zbank:
+    image: zbank:latest
+    container_name: zbank_app
+    restart: unless-stopped
+    volumes:
+      - zbank:/app
+    environment:
+      DATABASE_URL: "file:./local-db-data/prod.db"
+      EMAIL_HOST: "smtp.gmail.com"
+      AUTH_SECRET: "your-secret-key"
+      AUTH_URL: "http://localhost:8100"
+      EMAIL_PORT: "587"
+      EMAIL_SECURE: "false"
+      EMAIL_USER: "mahbdf4@gmail.com"
+      EMAIL_PASSWORD: "wxxlhbzvsdvvalsr"
+      EMAIL_TLS_CIPHERS: "SSLv3"
+    ports:
+      - "8100:3000"
+
+volumes:
+  zbank:

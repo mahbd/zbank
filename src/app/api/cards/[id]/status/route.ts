@@ -19,22 +19,23 @@ export async function PATCH(
 
     // Await the params since they're now Promise-based in Next.js 16
     const { id } = await params
+    const cardId = parseInt(id)
 
     // Check if card exists and belongs to the user
     const card = await prisma.card.findUnique({
-      where: { id }
+      where: { id: cardId }
     })
 
     if (!card) {
       return NextResponse.json({ error: 'Card not found' }, { status: 404 })
     }
 
-    if (card.userId !== session.user.id) {
+    if (card.userId !== parseInt(session.user.id)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
     const updatedCard = await prisma.card.update({
-      where: { id },
+      where: { id: cardId },
       data: { status: validatedData.status }
     })
 

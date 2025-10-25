@@ -14,7 +14,7 @@ export async function GET() {
 
     const cards = await prisma.card.findMany({
       where: {
-        userId: session.user.id
+        userId: parseInt(session.user.id)
       },
       include: {
         user: true,
@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
 
     const card = await prisma.card.create({
       data: {
+        balance: 10000,
         cardNumber: generateCardNumber(),
         cardType: validatedData.cardType,
         scheme: validatedData.scheme,
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
         deliveryState: validatedData.deliveryState,
         deliveryZipCode: validatedData.deliveryZipCode,
         deliveryCountry: validatedData.deliveryCountry,
-        userId: session.user.id
+        userId: parseInt(session.user.id)
       }
     })
 

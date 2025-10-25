@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,13 +12,10 @@ export default function SignIn() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError("")
 
     try {
       await signIn("credentials", {
@@ -29,9 +25,8 @@ export default function SignIn() {
         callbackUrl: "/",
       })
       // If we reach here, there was an error
-      setError("Invalid credentials")
     } catch (error) {
-      setError("An error occurred. Please try again.")
+      console.error("Error signing in:", error)
     } finally {
       setIsLoading(false)
     }
@@ -70,9 +65,6 @@ export default function SignIn() {
                 required
               />
             </div>
-            {error && (
-              <div className="text-red-600 text-sm">{error}</div>
-            )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>

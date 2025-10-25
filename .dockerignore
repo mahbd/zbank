@@ -1,0 +1,46 @@
+node_modules
+
+# Ignore local Next.js build output, which will be rebuilt in the container
+.next
+
+# Ignore the .git history
+.git
+.gitignore
+
+# Ignore local environment variables (we pass these in when running the container)
+.env
+.env.local
+.env.development.local
+.env.production.local
+
+# Ignore development and testing files
+# (If you have a dedicated 'test' folder)
+test/
+cypress/
+
+# Ignore editor and OS specific files
+.DS_Store
+*.swp
+
+# Ignore local database files
+prisma/*.db
+local-db-data/
+
+# Ignore build artifacts and cache
+.next
+dist/
+build/
+
+# Ignore logs
+*.log
+logs/
+
+# Ignore Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Ignore documentation and misc
+README.md
+*.md
+zbank.tar
