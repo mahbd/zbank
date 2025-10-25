@@ -3,11 +3,10 @@ version: '3.8'
 services:
   zbank:
     image: zbank:latest
-    container_name: zbank_app 
-    ports:
-      - "8100:3005"
+    container_name: zbank_app
+    restart: unless-stopped
     volumes:
-      - /home/ubuntu/zbank/:/app
+      - zbank:/app
     environment:
       DATABASE_URL: "file:./prod.db"
       EMAIL_HOST: "smtp.gmail.com"
@@ -18,4 +17,8 @@ services:
       EMAIL_USER: "mahbdf4@gmail.com"
       EMAIL_PASSWORD: "wxxlhbzvsdvvalsr"
       EMAIL_TLS_CIPHERS: "SSLv3"
-    restart: unless-stopped
+    ports:
+      - "8100:3000"
+
+volumes:
+  zbank:

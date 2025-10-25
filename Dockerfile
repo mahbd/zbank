@@ -1,30 +1,36 @@
-FROM node:lts
-
-# Set working directory
+FROM node:20-bookworm-slim AS base
 WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy package files first
+# Install dependencies only once so layers can be cached.
+FROM base AS deps
 COPY package*.json ./
+# Use --force to work around known peer conflicts in this repo
+RUN npm ci --force
 
-# Install dependencies (ignore peer conflicts)
-RUN npm install --legacy-peer-deps
-
-# Copy the rest of the project including Prisma schema
+# Build the Next.js application and generate the Prisma client.
+FROM base AS builder
+ENV NODE_ENV=production
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npx prisma generate && npm run build
+RUN npm prune --omit=dev --force && npm cache clean --force
 
-# Generate Prisma client
-RUN npx prisma generate
+# Slim runtime image with only what is needed to run the app.
+FROM node:20-bookworm-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build Next.js app
-RUN npm run build
+# Prisma requires OpenSSL present in the runtime image.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
-# Set the Next.js application to listen on port 3005 inside the container.
-# This environment variable tells Next.js where to listen.
-ENV PORT 3005
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
 
-# Expose the configured internal port (3005)
-EXPOSE 3005
-
-# Command to run migrations and then start the app
-# 'npm start' will now launch the app on the new PORT (3005)
-CMD npx prisma migrate deploy && npm start
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
