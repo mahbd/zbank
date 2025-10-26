@@ -13,7 +13,7 @@ export async function GET() {
 
     const transactions = await prisma.transaction.findMany({
       where: {
-        userId: parseInt(session.user.id)
+        userId: session.user.id
       },
       include: {
         card: true,
@@ -50,14 +50,14 @@ export async function POST(request: NextRequest) {
     // Check if card exists, is active, and belongs to the user (only for payments)
     if (cardId) {
       const card = await prisma.card.findUnique({
-        where: { id: parseInt(cardId) }
+        where: { id: cardId }
       })
 
       if (!card) {
         return NextResponse.json({ error: 'Card not found' }, { status: 404 })
       }
 
-      if (card.userId !== parseInt(session.user.id)) {
+      if (card.userId !== session.user.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
       }
 
@@ -77,8 +77,8 @@ export async function POST(request: NextRequest) {
     const transaction = await prisma.transaction.create({
       data: {
         ...transactionData,
-        ...(cardId && { cardId: parseInt(cardId) }),
-        userId: parseInt(session.user.id),
+        ...(cardId && { cardId: cardId }),
+        userId: session.user.id,
         status: 'COMPLETED'
       }
     })
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     // Update card balance for payments
     if (cardId && paymentTypes.includes(validatedData.type) && validatedData.amount > 0) {
       await prisma.card.update({
-        where: { id: parseInt(cardId) },
+        where: { id: cardId },
         data: {
           balance: {
             decrement: validatedData.amount

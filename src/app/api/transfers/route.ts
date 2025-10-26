@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Check if sender's card exists and belongs to them
     const senderCard = await prisma.card.findUnique({
-      where: { id: parseInt(validatedData.cardId) },
+      where: { id: validatedData.cardId },
       include: { user: true }
     })
 
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Card not found' }, { status: 404 })
     }
 
-    if (senderCard.userId !== parseInt(session.user.id)) {
+    if (senderCard.userId !== session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Recipient not found' }, { status: 404 })
     }
 
-    if (recipient.id === parseInt(session.user.id)) {
+    if (recipient.id === session.user.id) {
       return NextResponse.json({ error: 'Cannot transfer to yourself' }, { status: 400 })
     }
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     let recipientCard = null
     if (validatedData.recipientCardId) {
       // User specified which card to transfer to
-      recipientCard = recipientCards.find(card => card.id === parseInt(validatedData.recipientCardId!))
+      recipientCard = recipientCards.find(card => card.id === validatedData.recipientCardId!)
       if (!recipientCard) {
         return NextResponse.json({ error: 'Selected recipient card not found or not active' }, { status: 400 })
       }
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
           merchantName: recipient.name || recipient.email,
           category: 'Transfer',
           cardId: senderCard.id,
-          userId: parseInt(userId),
+          userId: userId,
         }
       })
 

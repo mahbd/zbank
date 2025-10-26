@@ -18,13 +18,39 @@ export async function GET(request: NextRequest) {
     }
 
     // Find users whose email or name matches the query (case-insensitive)
-    const users = await prisma.$queryRaw`
-      SELECT id, email, name
-      FROM User
-      WHERE (LOWER(email) LIKE LOWER(${`%${query}%`}) OR LOWER(name) LIKE LOWER(${`%${query}%`}))
-      AND id != ${parseInt(session.user.id)}
-      LIMIT 10
-    `
+    const users = await prisma.user.findMany({
+      where: {
+        AND: [
+          {
+            OR: [
+              {
+                email: {
+                  contains: query,
+                  mode: 'insensitive'
+                }
+              },
+              {
+                name: {
+                  contains: query,
+                  mode: 'insensitive'
+                }
+              }
+            ]
+          },
+          {
+            id: {
+              not: session.user.id
+            }
+          }
+        ]
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true
+      },
+      take: 10
+    })
 
     return NextResponse.json(users)
   } catch (error) {
