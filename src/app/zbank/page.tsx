@@ -88,13 +88,15 @@ export default function Dashboard() {
   })
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (status === "authenticated") {
+      loadData()
+    }
+  }, [status])
 
   const loadData = async () => {
     setLoading(true)
     try {
-      const [cardsRes, transactionsRes] = await Promise.all([
+            const [cardsRes, transactionsRes] = await Promise.all([
         fetch('/api/cards'),
         fetch('/api/transactions'),
       ])

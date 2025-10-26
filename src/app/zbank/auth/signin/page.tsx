@@ -22,7 +22,7 @@ export default function SignIn() {
         email,
         password,
         redirect: true,
-        callbackUrl: "/",
+        callbackUrl: "/zbank/",
       })
       // If we reach here, there was an error
     } catch (error) {
@@ -71,7 +71,7 @@ export default function SignIn() {
           </form>
           <div className="mt-4 text-center text-sm">
             Don't have an account?{" "}
-            <Link href="/auth/signup" className="text-blue-600 hover:underline">
+            <Link href="/zbank/auth/signup" className="text-blue-600 hover:underline">
               Sign up
             </Link>
           </div>

@@ -38,7 +38,7 @@ export default function SignUp() {
     try {
       const hashedPassword = await bcrypt.hash(password, 12)
 
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch("/zbank/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export default function SignUp() {
       })
 
       if (response.ok) {
-        router.push("/auth/signin?message=Account created successfully")
+        router.push("/zbank/auth/signin?message=Account created successfully")
       } else {
         const data = await response.json()
         setError(data.error || "An error occurred")
@@ -127,7 +127,7 @@ export default function SignUp() {
           </form>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link href="/auth/signin" className="text-blue-600 hover:underline">
+            <Link href="/zbank/auth/signin" className="text-blue-600 hover:underline">
               Sign in
             </Link>
           </div>
