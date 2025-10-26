@@ -17,27 +17,39 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([])
     }
 
-    // Find users whose email or name matches the query
+    // Find users whose email or name matches the query (case-insensitive)
     const users = await prisma.user.findMany({
       where: {
         AND: [
           {
             OR: [
-              { email: { contains: query, mode: 'insensitive' } },
-              { name: { contains: query, mode: 'insensitive' } }
+              {
+                email: {
+                  contains: query,
+                  mode: 'insensitive'
+                }
+              },
+              {
+                name: {
+                  contains: query,
+                  mode: 'insensitive'
+                }
+              }
             ]
           },
           {
-            id: { not: session.user.id } // Exclude current user
+            id: {
+              not: session.user.id
+            }
           }
         ]
       },
       select: {
         id: true,
         email: true,
-        name: true,
+        name: true
       },
-      take: 10 // Limit results
+      take: 10
     })
 
     return NextResponse.json(users)

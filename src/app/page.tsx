@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CreditCard, Plus, Activity, DollarSign, Lock, Unlock, LogOut, User } from 'lucide-react'
 import { formatCurrency, formatCardNumber } from '@/lib/utils'
 import { useForm } from 'react-hook-form'
@@ -259,7 +258,7 @@ export default function Dashboard() {
             <div className="flex justify-between items-center">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900" data-testid="dashboard-title">
-                  ZBank Dashboard
+                  ZeuZ Bank Dashboard
                 </h1>
                 <p className="text-gray-600">Manage your cards and transactions</p>
               </div>

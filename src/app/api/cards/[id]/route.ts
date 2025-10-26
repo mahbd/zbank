@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { cardStatusSchema } from '@/lib/validations'
 
-export async function PATCH(
+export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -13,9 +12,6 @@ export async function PATCH(
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const body = await request.json()
-    const validatedData = cardStatusSchema.parse(body)
 
     // Await the params since they're now Promise-based in Next.js 16
     const { id } = await params
@@ -33,13 +29,19 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    const updatedCard = await prisma.card.update({
-      where: { id: id },
-      data: { status: validatedData.status }
+    // Delete all transactions associated with this card first
+    await prisma.transaction.deleteMany({
+      where: { cardId: id }
     })
 
-    return NextResponse.json(updatedCard)
+    // Delete the card
+    await prisma.card.delete({
+      where: { id: id }
+    })
+
+    return NextResponse.json({ message: 'Card deleted successfully' })
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update card status' }, { status: 500 })
+    console.error('Error deleting card:', error)
+    return NextResponse.json({ error: 'Failed to delete card' }, { status: 500 })
   }
 }

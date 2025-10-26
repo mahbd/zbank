@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
 
     const card = await prisma.card.create({
       data: {
+        balance: 10000,
         cardNumber: generateCardNumber(),
         cardType: validatedData.cardType,
         scheme: validatedData.scheme,
