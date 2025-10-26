@@ -97,8 +97,8 @@ export default function Dashboard() {
     setLoading(true)
     try {
             const [cardsRes, transactionsRes] = await Promise.all([
-        fetch('/api/cards'),
-        fetch('/api/transactions'),
+        fetch('/zbank/api/cards'),
+        fetch('/zbank/api/transactions'),
       ])
       
       let cardsData = []
@@ -137,7 +137,7 @@ export default function Dashboard() {
   const createCard = async (data: CreateCardInput) => {
     setLoading(true)
     try {
-      const response = await fetch('/api/cards', {
+      const response = await fetch('/zbank/api/cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -166,7 +166,7 @@ export default function Dashboard() {
 
     const newStatus = card.status === 'ACTIVE' ? 'FROZEN' : 'ACTIVE'
     try {
-      const response = await fetch(`/api/cards/${cardId}/status`, {
+      const response = await fetch(`/zbank/api/cards/${cardId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -185,7 +185,7 @@ export default function Dashboard() {
 
   const makePayment = async (data: PaymentInput) => {
     try {
-      const response = await fetch('/api/transactions', {
+      const response = await fetch('/zbank/api/transactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

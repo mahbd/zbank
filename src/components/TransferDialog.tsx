@@ -73,7 +73,7 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
       }
 
       try {
-        const response = await fetch(`/api/users/search?q=${encodeURIComponent(userSearchQuery)}`)
+        const response = await fetch(`/zbank/api/users/search?q=${encodeURIComponent(userSearchQuery)}`)
         if (response.ok) {
           const users = await response.json()
           setUserSearchResults(users)
@@ -102,7 +102,7 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
   const fetchRecipientCards = async (email: string) => {
     setLoadingRecipientCards(true)
     try {
-      const response = await fetch(`/api/transfers/recipient-cards?email=${encodeURIComponent(email)}`)
+      const response = await fetch(`/zbank/api/transfers/recipient-cards?email=${encodeURIComponent(email)}`)
       if (response.ok) {
         const data = await response.json()
         setRecipientCards(data.cards || [])
@@ -120,7 +120,7 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
   const requestOTP = async () => {
     setRequestingOTP(true)
     try {
-      const response = await fetch('/api/otp/generate', {
+      const response = await fetch('/zbank/api/otp/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ purpose: 'transfer' }),
@@ -149,7 +149,7 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
   const onSubmit = async (data: TransferInput) => {
     setIsSubmitting(true)
     try {
-      const response = await fetch('/api/transfers', {
+      const response = await fetch('/zbank/api/transfers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

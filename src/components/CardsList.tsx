@@ -46,7 +46,7 @@ export function CardsList({
     if (!cardToDelete) return
 
     try {
-      const response = await fetch(`/api/cards/${cardToDelete.id}`, {
+      const response = await fetch(`/zbank/api/cards/${cardToDelete.id}`, {
         method: 'DELETE',
       })
       if (response.ok) {
