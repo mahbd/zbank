@@ -50,6 +50,7 @@ export const transferSchema = z.object({
   cardId: z.string().min(1, 'Card is required'),
   recipientCardId: z.string().optional(),
   description: z.string().min(1, 'Description is required').max(200, 'Description too long'),
+  otp: z.string().min(6, 'OTP must be 6 digits').max(6, 'OTP must be 6 digits'),
 })
 
 export type PaymentInput = z.infer<typeof paymentSchema>

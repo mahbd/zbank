@@ -2,15 +2,16 @@ import NextAuth from "next-auth"
 import { NextResponse } from "next/server"
 
 const { auth } = NextAuth({
+  basePath: "/zbank/api/auth",
   providers: [],
   session: { strategy: "jwt" },
-  pages: { signIn: "/auth/signin" },
+  pages: { signIn: "/zbank/auth/signin" },
 })
 
 export default auth((req) => {
   const isAuth = !!req.auth
-  const isAuthPage = req.nextUrl.pathname.startsWith('/auth')
-  const isApiAuthRoute = req.nextUrl.pathname.startsWith('/api/auth')
+  const isAuthPage = req.nextUrl.pathname.startsWith('/zbank/auth')
+  const isApiAuthRoute = req.nextUrl.pathname.startsWith('/zbank/api/auth')
 
   if (isApiAuthRoute) {
     return NextResponse.next()
@@ -18,7 +19,7 @@ export default auth((req) => {
 
   if (isAuthPage) {
     if (isAuth) {
-      return NextResponse.redirect(new URL('/', req.url))
+      return NextResponse.redirect(new URL('/zbank', req.url))
     }
     return NextResponse.next()
   }
@@ -30,7 +31,7 @@ export default auth((req) => {
     }
 
     return NextResponse.redirect(
-      new URL(`/auth/signin?from=${encodeURIComponent(from)}`, req.url)
+      new URL(`/zbank/auth/signin?from=${encodeURIComponent(from)}`, req.url)
     );
   }
 })

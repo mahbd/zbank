@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { transferSchema, type TransferInput } from "@/lib/validations"
 import { toast } from "sonner"
@@ -47,6 +46,8 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [recipientCards, setRecipientCards] = useState<RecipientCard[]>([])
   const [loadingRecipientCards, setLoadingRecipientCards] = useState(false)
+  const [otpSent, setOtpSent] = useState(false)
+  const [requestingOTP, setRequestingOTP] = useState(false)
 
   const form = useForm<TransferInput>({
     resolver: zodResolver(transferSchema),
@@ -55,11 +56,12 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
       amount: 0,
       cardId: "",
       description: "",
+      otp: "",
     },
   })
 
   const selectedCardId = form.watch("cardId")
-  const selectedCard = availableCards.find(card => card.id === selectedCardId)
+  const selectedCard = availableCards.find(card => String(card.id) === selectedCardId)
   const transferAmount = form.watch("amount")
 
   // Search for users when query changes
@@ -71,7 +73,7 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
       }
 
       try {
-        const response = await fetch(`/api/users/search?q=${encodeURIComponent(userSearchQuery)}`)
+        const response = await fetch(`/zbank/api/users/search?q=${encodeURIComponent(userSearchQuery)}`)
         if (response.ok) {
           const users = await response.json()
           setUserSearchResults(users)
@@ -100,7 +102,7 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
   const fetchRecipientCards = async (email: string) => {
     setLoadingRecipientCards(true)
     try {
-      const response = await fetch(`/api/transfers/recipient-cards?email=${encodeURIComponent(email)}`)
+      const response = await fetch(`/zbank/api/transfers/recipient-cards?email=${encodeURIComponent(email)}`)
       if (response.ok) {
         const data = await response.json()
         setRecipientCards(data.cards || [])
@@ -115,10 +117,39 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
     }
   }
 
+  const requestOTP = async () => {
+    setRequestingOTP(true)
+    try {
+      const response = await fetch('/zbank/api/otp/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ purpose: 'transfer' }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setOtpSent(true)
+        toast.success('OTP sent to your email!')
+        
+        // In development, show the OTP for testing
+        if (process.env.NODE_ENV === 'development' && data.otp) {
+          toast.info(`Development: OTP is ${data.otp}`)
+        }
+      } else {
+        toast.error('Failed to send OTP')
+      }
+    } catch (error) {
+      console.error('Error requesting OTP:', error)
+      toast.error('Failed to send OTP')
+    } finally {
+      setRequestingOTP(false)
+    }
+  }
+
   const onSubmit = async (data: TransferInput) => {
     setIsSubmitting(true)
     try {
-      const response = await fetch('/api/transfers', {
+      const response = await fetch('/zbank/api/transfers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -135,10 +166,20 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
         setSelectedUser(null)
         setUserSearchQuery("")
         setRecipientCards([])
+        setOtpSent(false)
         onOpenChange(false)
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to process transfer')
+        
+        // Handle OTP-specific errors
+        if (error.error === 'Invalid or expired OTP') {
+          form.setError('otp', {
+            type: 'server',
+            message: 'Invalid or expired OTP. Please request a new one.'
+          })
+        } else {
+          toast.error(error.error || 'Failed to process transfer')
+        }
       }
     } catch (error) {
       console.error('Transfer error:', error)
@@ -248,20 +289,19 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Recipient's Card</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select recipient's card" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="" disabled>Select recipient's card</option>
                         {recipientCards.map((card) => (
-                          <SelectItem key={card.id} value={card.id}>
+                          <option key={card.id} value={card.id}>
                             **** **** **** {card.cardNumber.slice(-4)} - {card.scheme} {card.cardType} - ${card.balance.toFixed(2)}
-                          </SelectItem>
+                          </option>
                         ))}
-                      </SelectContent>
-                    </Select>
+                      </select>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -274,20 +314,19 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>From Card</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a card" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
+                  <FormControl>
+                    <select
+                      {...field}
+                      className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="" disabled>Select a card</option>
                       {availableCards.map((card) => (
-                        <SelectItem key={card.id} value={card.id}>
+                        <option key={card.id} value={card.id}>
                           **** **** **** {card.cardNumber.slice(-4)} - ${card.balance.toFixed(2)}
-                        </SelectItem>
+                        </option>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -339,6 +378,41 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="otp"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Verification Code</FormLabel>
+                  <div className="flex space-x-2">
+                    <FormControl>
+                      <Input
+                        placeholder="Enter 6-digit OTP"
+                        maxLength={6}
+                        {...field}
+                        className="flex-1"
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={requestOTP}
+                      disabled={requestingOTP || otpSent}
+                      className="whitespace-nowrap"
+                    >
+                      {requestingOTP ? 'Sending...' : otpSent ? 'OTP Sent' : 'Get OTP'}
+                    </Button>
+                  </div>
+                  {otpSent && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      OTP sent to your email. Check your inbox and enter the 6-digit code.
+                    </p>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="flex justify-end space-x-2 pt-4">
               <Button
                 type="button"
@@ -350,7 +424,25 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting || !selectedCard || transferAmount > selectedCard.balance || !selectedUser || (recipientCards.length > 1 && !form.watch("recipientCardId"))}
+                disabled={(() => {
+                  const disabled = isSubmitting || !selectedCard || transferAmount > selectedCard.balance || !selectedUser || (recipientCards.length > 1 && !form.watch("recipientCardId")) || !form.watch("otp");
+                  if (disabled) {
+                    console.log('Transfer button disabled because:', {
+                      isSubmitting,
+                      selectedCard: !!selectedCard,
+                      transferAmount,
+                      selectedCardBalance: selectedCard?.balance,
+                      amountExceedsBalance: transferAmount > (selectedCard?.balance || 0),
+                      selectedUser: !!selectedUser,
+                      recipientCardsLength: recipientCards.length,
+                      recipientCardId: form.watch("recipientCardId"),
+                      needsRecipientCard: recipientCards.length > 1 && !form.watch("recipientCardId"),
+                      otp: form.watch("otp"),
+                      hasOtp: !!form.watch("otp")
+                    });
+                  }
+                  return disabled;
+                })()}
               >
                 {isSubmitting ? "Processing..." : "Transfer"}
               </Button>

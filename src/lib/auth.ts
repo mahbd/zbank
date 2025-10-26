@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  basePath: "/zbank/api/auth",
   providers: [
     Credentials({
       name: "credentials",
@@ -36,7 +37,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         return {
-          id: user.id,
+          id: user.id.toString(),
           email: user.email,
           name: user.name,
         }
@@ -51,7 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
-    signIn: "/auth/signin"
+    signIn: "/zbank/auth/signin"
   },
   callbacks: {
     async jwt({ token, user }: any) {
