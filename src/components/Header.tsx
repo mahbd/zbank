@@ -18,7 +18,7 @@ export function Header() {
                 src="zeuz-logo.png"
                 alt="ZeuZ Bank Logo"
               />
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 id="data-testid" className="text-3xl font-bold text-gray-900">
                 ZeuZ Bank
               </h1>
             </div>
