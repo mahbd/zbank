@@ -1,43 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession, signOut } from "next-auth/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  CreditCard,
   Plus,
-  Activity,
-  DollarSign,
-  Lock,
-  Unlock,
-  LogOut,
-  User,
 } from "lucide-react";
-import { formatCurrency, formatCardNumber } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createCardSchema,
-  transactionSchema,
   type CreateCardInput,
-  type TransactionInput,
   paymentSchema,
   type PaymentInput,
 } from "@/lib/validations";
@@ -292,45 +265,6 @@ export default function Dashboard() {
     <>
       <div className="min-h-screen bg-gray-50 p-6" data-testid="dashboard">
         <div className="max-w-7xl mx-auto">
-          <header className="mb-8">
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="flex gap-2">
-                  <img
-                  className="w-8"
-                    src={"zeuz-logo.png"}
-                    alt="ZeuZ Bank Logo"
-                  />
-                  <h1
-                    className="text-3xl font-bold text-gray-900"
-                    data-testid="dashboard-title"
-                  >
-                  ZeuZ Bank Dashboard
-                  </h1>
-                </div>
-                <p className="text-gray-600">
-                  Manage your cards and transactions
-                </p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <User className="w-4 h-4" />
-                  <span className="text-sm font-medium">
-                    {session?.user?.name || session?.user?.email}
-                  </span>
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-                  className="flex items-center space-x-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Logout</span>
-                </Button>
-              </div>
-            </div>
-          </header>
-
           {loading ? (
             <div className="text-center">Loading...</div>
           ) : (
