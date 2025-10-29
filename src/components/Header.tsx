@@ -15,7 +15,7 @@ export function Header() {
             <div className="flex gap-2">
               <img
                 className="w-8"
-                src="zeuz-logo.png"
+                src="/zeuz-logo.png"
                 alt="ZeuZ Bank Logo"
               />
               <h1 data-testid="dashboard-title" className="text-3xl font-bold text-gray-900">
