@@ -8,6 +8,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import bcrypt from "bcryptjs"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function SignUp() {
   const [name, setName] = useState("")
@@ -16,6 +25,7 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +61,7 @@ export default function SignUp() {
       })
 
       if (response.ok) {
-        router.push("/auth/signin?message=Account created successfully")
+        setShowSuccessDialog(true)
       } else {
         const data = await response.json()
         setError(data.error || "An error occurred")
@@ -133,6 +143,21 @@ export default function SignUp() {
           </div>
         </CardContent>
       </Card>
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle data-testid="alert-dialog-title">Account Created Successfully!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your account has been created. You can now sign in to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => router.push("/auth/signin")}>
+              Go to Sign In
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
