@@ -39,7 +39,8 @@ export async function PATCH(
     })
 
     return NextResponse.json(updatedCard)
-  } catch (error) {
+  } catch (err) {
+    console.error('Card status update error:', err)
     return NextResponse.json({ error: 'Failed to update card status' }, { status: 500 })
   }
 }

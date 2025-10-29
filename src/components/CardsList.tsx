@@ -18,21 +18,19 @@ interface BankCard {
   cardholderName?: string;
   creditLimit?: number;
   dailyLimit: number;
-  transactions: any[];
+  transactions: unknown[];
 }
 
 interface CardsListProps {
   cards: BankCard[]
   onToggleStatus: (cardId: string) => void
   onMakePayment: (cardId: string) => void
-  loading: boolean
 }
 
 export function CardsList({
   cards,
   onToggleStatus,
   onMakePayment,
-  loading,
 }: CardsListProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [cardToDelete, setCardToDelete] = useState<BankCard | null>(null)

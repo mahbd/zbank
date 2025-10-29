@@ -35,17 +35,15 @@ interface TransferDialogProps {
     cardType: string
     balance: number
   }>
-  loading?: boolean
 }
 
-export function TransferDialog({ open, onOpenChange, availableCards, loading }: TransferDialogProps) {
+export function TransferDialog({ open, onOpenChange, availableCards }: TransferDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [userSearchOpen, setUserSearchOpen] = useState(false)
   const [userSearchQuery, setUserSearchQuery] = useState("")
   const [userSearchResults, setUserSearchResults] = useState<User[]>([])
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [recipientCards, setRecipientCards] = useState<RecipientCard[]>([])
-  const [loadingRecipientCards, setLoadingRecipientCards] = useState(false)
   const [otpSent, setOtpSent] = useState(false)
   const [requestingOTP, setRequestingOTP] = useState(false)
 
@@ -100,7 +98,6 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
   }, [selectedUser, form])
 
   const fetchRecipientCards = async (email: string) => {
-    setLoadingRecipientCards(true)
     try {
       const response = await fetch(`/api/transfers/recipient-cards?email=${encodeURIComponent(email)}`)
       if (response.ok) {
@@ -112,8 +109,6 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
     } catch (error) {
       console.error('Error fetching recipient cards:', error)
       setRecipientCards([])
-    } finally {
-      setLoadingRecipientCards(false)
     }
   }
 
@@ -200,7 +195,7 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
             <FormField
               control={form.control}
               name="recipientEmail"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Recipient</FormLabel>
                   <div className="relative">
@@ -288,13 +283,13 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
                 name="recipientCardId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Recipient's Card</FormLabel>
+                    <FormLabel>Recipient&apos;s Card</FormLabel>
                     <FormControl>
                       <select
                         {...field}
                         className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <option value="" disabled>Select recipient's card</option>
+                        <option value="" disabled>Select recipient&apos;s card</option>
                         {recipientCards.map((card) => (
                           <option key={card.id} value={card.id}>
                             **** **** **** {card.cardNumber.slice(-4)} - {card.scheme} {card.cardType} - ${card.balance.toFixed(2)}
