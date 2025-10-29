@@ -45,7 +45,7 @@ export default function RootLayout({
                 <div className="flex gap-2">
                   <img
                     className="w-8 h-8"
-                    src="zeuz-logo.png"
+                    src="/zeuz-logo.png"
                     alt="ZeuZ Bank Logo"
                   />
                   <span className="text-xl font-bold text-gray-900">ZeuZ Bank</span>
