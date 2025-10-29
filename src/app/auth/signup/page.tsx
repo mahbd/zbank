@@ -268,11 +268,6 @@ export default function SignUp() {
             <AlertDialogTitle className="text-green-600">Account Created Successfully!</AlertDialogTitle>
             <AlertDialogDescription className="space-y-3">
               <p>Your account has been created successfully.</p>
-              <div className="bg-gray-100 p-3 rounded-md">
-                <p className="text-sm font-semibold text-gray-700">Transaction ID:</p>
-                <p className="text-lg font-mono font-bold text-gray-900">{transactionId}</p>
-              </div>
-              <p className="text-sm">Please save this transaction ID for your records.</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
