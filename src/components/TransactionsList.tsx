@@ -51,7 +51,7 @@ export function TransactionsList({ transactions }: TransactionsListProps) {
                       {new Date(transaction.createdAt).toLocaleDateString()}
                     </p>
                     <p className="text-xs text-gray-400" data-testid={`transaction-description-${transaction.id}`}>
-                      Description: {transaction.description}
+                      {transaction.description}
                     </p>
                   </div>
                 </div>
