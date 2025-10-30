@@ -37,7 +37,7 @@ export default function RootLayout({
         <Toaster />
 
         {/* Footer */}
-        <footer className="bg-gray-50 border-t border-gray-200 mt-16">
+        <footer className="bg-gray-50 border-t border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
               {/* Company Info */}

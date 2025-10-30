@@ -41,9 +41,7 @@ export function TransactionsList({ transactions }: TransactionsListProps) {
                     <Activity className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="font-medium" data-testid={`transaction-description-${transaction.id}`}>
-                      {transaction.description}
-                    </p>
+                    
                     {transaction.merchantName && (
                       <p className="text-sm text-gray-500">
                         {transaction.merchantName}
@@ -51,6 +49,9 @@ export function TransactionsList({ transactions }: TransactionsListProps) {
                     )}
                     <p className="text-xs text-gray-400">
                       {new Date(transaction.createdAt).toLocaleDateString()}
+                    </p>
+                    <p className="text-xs text-gray-400" data-testid={`transaction-description-${transaction.id}`}>
+                      Description: {transaction.description}
                     </p>
                   </div>
                 </div>

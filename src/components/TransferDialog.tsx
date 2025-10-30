@@ -288,13 +288,13 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
                 name="recipientCardId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Recipient's Card</FormLabel>
+                    <FormLabel>Recipient&apos;s Card</FormLabel>
                     <FormControl>
                       <select
                         {...field}
                         className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <option value="" disabled>Select recipient's card</option>
+                        <option value="" disabled>Select recipient&apos;s card</option>
                         {recipientCards.map((card) => (
                           <option key={card.id} value={card.id}>
                             **** **** **** {card.cardNumber.slice(-4)} - {card.scheme} {card.cardType} - ${card.balance.toFixed(2)}
