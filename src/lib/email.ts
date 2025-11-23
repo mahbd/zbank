@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASSWORD || 'will-be-provided-later'
   },
   tls: {
-    ciphers: process.env.EMAIL_TLS_CIPHERS || 'SSLv3'
+    rejectUnauthorized: false
   }
 })
 
@@ -32,7 +32,7 @@ export async function sendEmail({ to, subject, html, text }: EmailOptions): Prom
     }
 
     const info = await transporter.sendMail(mailOptions)
-    console.log('Email sent successfully:', info.messageId)
+    console.log(`Email sent to ${to} from ${process.env.EMAIL_USER} with subject ${subject} and messageId ${info.messageId}`)
     return true
   } catch (error) {
     console.error('Error sending email:', error)
