@@ -219,7 +219,13 @@ export default function Dashboard() {
     }
   };
 
-  const handleVASServiceSelect = (service: any) => {
+  const handleVASServiceSelect = (service: {
+    id: string;
+    name: string;
+    description: string;
+    minAmount: number;
+    maxAmount: number;
+  }) => {
     setSelectedVASService(service);
     // Pre-fill the payment form with VAS service details
     paymentForm.setValue("type", getTransactionTypeFromService(service.id));
@@ -311,7 +317,6 @@ export default function Dashboard() {
                     paymentForm.setValue("cardId", cardId);
                     setMakePaymentOpen(true);
                   }}
-                  loading={loading}
                 />
               </section>
 
@@ -355,7 +360,6 @@ export default function Dashboard() {
         open={makeTransferOpen}
         onOpenChange={setMakeTransferOpen}
         availableCards={cards}
-        loading={loading}
       />
     </>
   );

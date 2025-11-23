@@ -4,20 +4,28 @@ import { verifyOTP } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth()
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { code, purpose = 'transfer' } = await request.json()
-
-    if (!code) {
+    const { code, purpose = 'transfer', email, otp } = await request.json()
+    
+    // For signin/signup, email is required instead of session
+    const otpCode = code || otp
+    
+    if (!otpCode) {
       return NextResponse.json({ error: 'OTP code is required' }, { status: 400 })
     }
 
+    let userEmail = email
+    
+    // For authenticated requests (like transfer), get email from session
+    if (!userEmail) {
+      const session = await auth()
+      if (!session?.user?.email) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+      userEmail = session.user.email
+    }
+
     // Verify OTP
-    const isValid = await verifyOTP(session.user.email, code, purpose)
+    const isValid = await verifyOTP(userEmail, otpCode, purpose)
 
     if (isValid) {
       return NextResponse.json({ message: 'OTP verified successfully' })

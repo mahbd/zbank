@@ -4,16 +4,21 @@ import { createAndSendOTP } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth()
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { purpose = 'transfer', email } = await request.json()
+    
+    let userEmail = email
+    
+    // For authenticated requests (like transfer), get email from session
+    if (!userEmail) {
+      const session = await auth()
+      if (!session?.user?.email) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+      userEmail = session.user.email
     }
 
-    const { purpose = 'transfer' } = await request.json()
-
     // Generate and send OTP
-    const otp = await createAndSendOTP(session.user.email, purpose)
+    const otp = await createAndSendOTP(userEmail, purpose)
 
     if (otp) {
       return NextResponse.json({

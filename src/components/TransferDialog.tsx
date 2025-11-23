@@ -35,17 +35,15 @@ interface TransferDialogProps {
     cardType: string
     balance: number
   }>
-  loading?: boolean
 }
 
-export function TransferDialog({ open, onOpenChange, availableCards, loading }: TransferDialogProps) {
+export function TransferDialog({ open, onOpenChange, availableCards }: TransferDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [userSearchOpen, setUserSearchOpen] = useState(false)
   const [userSearchQuery, setUserSearchQuery] = useState("")
   const [userSearchResults, setUserSearchResults] = useState<User[]>([])
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [recipientCards, setRecipientCards] = useState<RecipientCard[]>([])
-  const [loadingRecipientCards, setLoadingRecipientCards] = useState(false)
   const [otpSent, setOtpSent] = useState(false)
   const [requestingOTP, setRequestingOTP] = useState(false)
 
@@ -100,7 +98,6 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
   }, [selectedUser, form])
 
   const fetchRecipientCards = async (email: string) => {
-    setLoadingRecipientCards(true)
     try {
       const response = await fetch(`/api/transfers/recipient-cards?email=${encodeURIComponent(email)}`)
       if (response.ok) {
@@ -112,8 +109,6 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
     } catch (error) {
       console.error('Error fetching recipient cards:', error)
       setRecipientCards([])
-    } finally {
-      setLoadingRecipientCards(false)
     }
   }
 
@@ -200,7 +195,7 @@ export function TransferDialog({ open, onOpenChange, availableCards, loading }: 
             <FormField
               control={form.control}
               name="recipientEmail"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Recipient</FormLabel>
                   <div className="relative">
