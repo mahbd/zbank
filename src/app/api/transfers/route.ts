@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
           amount: validatedData.amount,
           type: 'TRANSFER',
           status: 'COMPLETED',
-          description: `Transfer to ${recipient.email}: ${validatedData.description}`,
+          description: `${validatedData.description}`,
           merchantName: recipient.name || recipient.email,
           category: 'Transfer',
           cardId: senderCard.id,

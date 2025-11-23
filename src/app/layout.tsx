@@ -37,7 +37,7 @@ export default function RootLayout({
         <Toaster />
 
         {/* Footer */}
-        <footer className="bg-gray-50 border-t border-gray-200 mt-16">
+        <footer className="bg-gray-50 border-t border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
               {/* Company Info */}
@@ -45,7 +45,7 @@ export default function RootLayout({
                 <div className="flex gap-2">
                   <img
                     className="w-8 h-8"
-                    src="zeuz-logo.png"
+                    src="/zeuz-logo.png"
                     alt="ZeuZ Bank Logo"
                   />
                   <span className="text-xl font-bold text-gray-900">ZeuZ Bank</span>

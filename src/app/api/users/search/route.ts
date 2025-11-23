@@ -25,14 +25,12 @@ export async function GET(request: NextRequest) {
             OR: [
               {
                 email: {
-                  contains: query,
-                  mode: 'insensitive'
+                  contains: query
                 }
               },
               {
                 name: {
-                  contains: query,
-                  mode: 'insensitive'
+                  contains: query
                 }
               }
             ]
